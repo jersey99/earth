@@ -1,7 +1,9 @@
 This is a fork of https://github.com/cambecc/earth
 
 The ultimate goal here is to:
-1. Make any scalar or vector field dataset of the earth, easily attachable to the workflow of this project and hence visualize it easily.
+
+1. Make any scalar or vector field dataset of the earth easily attachable to the workflow of this project and hence visualize it.
+
 2. Merge with the main project.
 
 Let's see if this is possible.
