@@ -472,8 +472,10 @@
 
         var projection = globe.projection;
         var bounds = globe.bounds(view);
+
+        var isPrimaryVector = primaryGrid.field === "vector";
         // How fast particles move on the screen (arbitrary value chosen for aesthetics).
-        var velocityScale = bounds.height * primaryGrid.particles.velocityScale;
+        var velocityScale = isPrimaryVector ? bounds.height * primaryGrid.particles.velocityScale : 0.;
 
         var columns = [];
         var point = [];
@@ -490,25 +492,31 @@
                     point[0] = x; point[1] = y;
                     var coord = projection.invert(point);
                     var color = TRANSPARENT_BLACK;
-                    var wind = null;
+                    var primFieldPoint = null;
                     if (coord) {
                         var λ = coord[0], φ = coord[1];
                         if (isFinite(λ)) {
-                            wind = interpolate(λ, φ);
-                            var scalar = null;
-                            if (wind) {
-                                wind = distort(projection, λ, φ, x, y, velocityScale, wind);
-                                scalar = wind[2];
+                            if (isPrimaryVector) {
+                                primFieldPoint = interpolate(λ, φ);
+                                var scalar = null;
+                                if (primFieldPoint) {
+                                    primFieldPoint = distort(projection, λ, φ, x, y, velocityScale, primFieldPoint);
+                                    scalar = primFieldPoint[2];
+                                }
+                                if (hasDistinctOverlay) {
+                                    scalar = overlayInterpolate(λ, φ);
+                                }
+                                if (µ.isValue(scalar)) {
+                                    color = scale.gradient(scalar, OVERLAY_ALPHA);
+                                }
                             }
-                            if (hasDistinctOverlay) {
-                                scalar = overlayInterpolate(λ, φ);
-                            }
-                            if (µ.isValue(scalar)) {
-                                color = scale.gradient(scalar, OVERLAY_ALPHA);
+                            else {
+                                primFieldPoint = interpolate(λ, φ);
+                                color = scale.gradient(primFieldPoint, OVERLAY_ALPHA);
                             }
                         }
                     }
-                    column[y+1] = column[y] = wind || HOLE_VECTOR;
+                    column[y+1] = column[y] = primFieldPoint || HOLE_VECTOR;
                     mask.set(x, y, color).set(x+1, y, color).set(x, y+1, color).set(x+1, y+1, color);
                 }
             }
@@ -546,6 +554,7 @@
 
     function animate(globe, field, grids) {
         if (!globe || !field || !grids) return;
+        if (grids.primaryGrid.field == "scalar") return;
 
         var cancel = this.cancel;
         var bounds = globe.bounds(view);
@@ -601,6 +610,8 @@
         g.fillStyle = fadeFillStyle;
 
         function draw() {
+            // HACK: Return statement here stops the wind
+            return;
             // Fade existing particle trails.
             var prev = g.globalCompositeOperation;
             g.globalCompositeOperation = "destination-in";
@@ -810,7 +821,10 @@
         if (field.isDefined(point[0], point[1]) && grids) {
             var wind = grids.primaryGrid.interpolate(λ, φ);
             if (µ.isValue(wind)) {
-                showWindAtLocation(wind, grids.primaryGrid);
+                if (grids.primaryGrid.field == "vector") {
+                    showWindAtLocation(wind, grids.primaryGrid);
+                } else showOverlayValueAtLocation(wind, grids.overlayGrid);
+
             }
             if (grids.overlayGrid !== grids.primaryGrid) {
                 var value = grids.overlayGrid.interpolate(λ, φ);
@@ -1013,6 +1027,7 @@
         configuration.on("change:param", function(context, mode) {
             d3.selectAll(".ocean-mode").classed("invisible", mode !== "ocean");
             d3.selectAll(".wind-mode").classed("invisible", mode !== "wind");
+            d3.selectAll(".mag-mode").classed("invisible", mode !== "mag");
             switch (mode) {
                 case "wind":
                     d3.select("#nav-backward-more").attr("title", "-1 Day");
@@ -1060,6 +1075,14 @@
         });
         configuration.on("change:param", function(x, param) {
             d3.select("#ocean-mode-enable").classed("highlighted", param === "ocean");
+        });
+        d3.select("#mag-mode-enable").on("click", function() {
+            if (configuration.get("param") !== "mag") {
+                configuration.save({param: "mag", surface: "surface", level: "level", overlayType: "magFieldF"});
+            }
+        });
+        configuration.on("change:param", function(x, param) {
+            d3.select("#mag-mode-enable").classed("highlighted", param === "mag");
         });
 
         // Add logic to disable buttons that are incompatible with each other.

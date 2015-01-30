@@ -494,6 +494,139 @@ var products = function() {
             }
         },
 
+        "magFieldD": {
+            matches: _.matches({param: "mag", overlayType: "magFieldD"}),
+            create: function(attr) {
+                return buildProduct({
+                    field: "scalar",
+                    type: "magFieldD",
+                    description: localize({
+                        name: {en: "Magnetic Field Declination", ja: "気温"},
+                        qualifier: {en: " @ " + describeSurface(attr), ja: " @ " + describeSurfaceJa(attr)}
+                    }),
+                    paths: [gfs1p0degPath(attr, "magFieldD", attr.surface, attr.level)],
+                    date: gfsDate(attr),
+                    builder: function(file) {
+                        var record = file[0], data = record.data;
+                        return {
+                            header: record.header,
+                            interpolate: bilinearInterpolateScalar,
+                            data: function(i) {
+                                return data[i];
+                            }
+                        }
+                    },
+                    units: [
+                        {label: "°",  conversion: function(x) { return x; },                precision: 1}
+                    ],
+                    scale: {
+                        bounds: [-180, 180],
+                        gradient: µ.segmentedColorScale([
+                            [-150,  [37, 4, 42]],
+                            [-120,  [41, 10, 130]],
+                            [-90,   [81, 40, 40]],
+                            [-60,   [192, 37, 149]],
+                            [-30,   [70, 215, 215]],
+                            [0,     [21, 84, 187]],
+                            [30,    [24, 132, 14]],
+                            [60,    [247, 251, 59]],
+                            [90,    [235, 167, 21]],
+                            [120,   [230, 71, 39]],
+                            [150,   [88, 27, 67]]
+                        ])
+                    }
+                });
+            }
+        },
+        "magFieldF": {
+            matches: _.matches({param: "mag", overlayType: "magFieldF"}),
+            create: function(attr) {
+                return buildProduct({
+                    field: "scalar",
+                    type: "magFieldF",
+                    description: localize({
+                        name: {en: "Magnetic Field Total Intensity", ja: "気温"},
+                        qualifier: {en: " @ " + describeSurface(attr), ja: " @ " + describeSurfaceJa(attr)}
+                    }),
+                    paths: [gfs1p0degPath(attr, "magFieldF", attr.surface, attr.level)],
+                    date: gfsDate(attr),
+                    builder: function(file) {
+                        var record = file[0], data = record.data;
+                        return {
+                            header: record.header,
+                            interpolate: bilinearInterpolateScalar,
+                            data: function(i) {
+                                return data[i];
+                            }
+                        }
+                    },
+                    units: [
+                        {label: "nT",  conversion: function(x) { return x; },                precision: 1}
+                    ],
+                    scale: {
+                        bounds: [22567, 66987],
+                        gradient: µ.segmentedColorScale([
+                            [26000,  [37, 4, 42]],
+                            [30000,  [41, 10, 130]],
+                            [34000,  [81, 40, 40]],
+                            [38000,  [192, 37, 149]],
+                            [42000,  [70, 215, 215]],
+                            [46000,  [21, 84, 187]],
+                            [50000,  [24, 132, 14]],
+                            [54000,  [247, 251, 59]],
+                            [58000,  [235, 167, 21]],
+                            [62000,  [230, 71, 39]],
+                            [66000,  [88, 27, 67]]
+                        ])
+                    }
+                });
+            }
+        },
+        "magFieldFsv": {
+            matches: _.matches({param: "mag", overlayType: "magFieldFsv"}),
+            create: function(attr) {
+                return buildProduct({
+                    field: "scalar",
+                    type: "magFieldFsv",
+                    description: localize({
+                        name: {en: "Magnetic Field Total Intensity Secular Variation", ja: "気温"},
+                        qualifier: {en: " @ " + describeSurface(attr), ja: " @ " + describeSurfaceJa(attr)}
+                    }),
+                    paths: [gfs1p0degPath(attr, "magFieldFsv", attr.surface, attr.level)],
+                    date: gfsDate(attr),
+                    builder: function(file) {
+                        var record = file[0], data = record.data;
+                        return {
+                            header: record.header,
+                            interpolate: bilinearInterpolateScalar,
+                            data: function(i) {
+                                return data[i];
+                            }
+                        }
+                    },
+                    units: [
+                        {label: "nT",  conversion: function(x) { return x; },                precision: 1}
+                    ],
+                    scale: {
+                        bounds: [-130, 95],
+                        gradient: µ.segmentedColorScale([
+                            [-106,  [37, 4, 42]],
+                            [-92,  [41, 10, 130]],
+                            [-68,  [81, 40, 40]],
+                            [-44,  [192, 37, 149]],
+                            [-20,  [70, 215, 215]],
+                            [4,  [21, 84, 187]],
+                            [28,  [24, 132, 14]],
+                            [52,  [247, 251, 59]],
+                            [76,  [235, 167, 21]],
+                            [100,  [230, 71, 39]],
+                            [124,  [88, 27, 67]]
+                        ])
+                    }
+                });
+            }
+        },
+
         "off": {
             matches: _.matches({overlayType: "off"}),
             create: function() {
